@@ -1,0 +1,80 @@
+#! /bin/bash
+# Helloo
+
+if [ "$1" = "init" ]; then
+  if [ -f ".$2/version" ]; then
+     echo "Inited"
+      exit 0
+   else
+     if [ ! -d ".$2" ]; then
+         mkdir .$2
+     fi
+    i=2 
+    cp $2 .$2/1
+    diff $2 .$2/1 >.$2/$i
+    echo $i >.$2/version
+   exit 0
+ fi
+
+fi 
+
+if [ "$1" = "commit" ] ; then
+   if [ ! -f ".$2/version" ]; then
+     echo "Ini file!"
+ else 
+ File=.$2/version 
+{
+ read i 
+}<$File
+ diff -u $2 .$2/1 >.$2/tmp
+ diff -u else 
+ File=.$2/version 
+{
+ read i 
+}<$File
+ diff -u $2 .$2/1 >.$2/tmp
+ diff -u .$2/tmp .$2/$i &> /dev/null
+ if [ $? -ne 0 ] ; then 
+ ((i=$i+1))
+ diff -u $2 .$2/1 >.$2/$i
+ echo $i >.$2/version
+fi
+fi
+fi
+
+if [ "$1" = "status" ] ; then
+ File=.$2/version
+{
+read i
+}<$File
+diff -u $2 .$2/1 >.$2/tmp
+diff -u .$2/tmp .$2/$i &> /dev/null
+ if [ $? -ne 0 ] ; then echo "File changed" 
+exit 0
+else
+echo "No changes"
+exit 0
+fi
+fi   
+
+if [ "$1" = "diff" ] ; then
+File=.$2/version
+{
+read i
+}<$File
+cp .$2/1 .$2/tmp
+ patch -R .$2/1 .$2/$i
+ diff -u .$2/1 $2
+ cp .$2/tmp .$2/1
+fi
+
+if [ "$1" = "update" ] ; then
+ if [ ! -f ".$2/$3" ] ; then
+  echo "No version"
+ else
+ cp .$2/1 .$2/tmp
+   patch -R .$2/1 .$2/$3
+  cp .$2/1 $2
+  cp .$2/tmp .$2/1
+fi
+fi 
