@@ -1,0 +1,206 @@
+#! /bin/bash -e
+# myvcs
+myname="${0##*/} (PID $$)"
+fetch/.fetch4merc  
+arg=0
+ref=0
+ref2=1 
+declare -a ARRAY
+declare -a masDem
+
+if [ "$1" = "-w" ]; then
+	direc=$2
+	arg=2
+	if [ "$2" = "-r" ]; then
+		echo "So bad."
+	fi
+	
+	if [ "$2" = "-w" ]; then
+		echo "So bad."
+	fi
+	
+	if [ "$3" = "-r" ]; then
+		re=$4
+		ref=1
+		arg=4
+	fi
+ elif [ "$1" = "-r" ]; then
+	re=$2
+	ref=1
+	arg=2	
+	if [ "$2" = "-w" ]; then
+		echo "So bad."
+	fi
+	
+	if [ "$2" = "-r" ]; then
+		echo "So bad."
+	fi
+	
+	if [ $# -le "2" ]; then   #<3 proverit
+		echo "So bad."	
+		exit 0 
+	fi
+		if [ $3 = "-w" ]; then
+			direc=$4
+			arg=4
+		fi
+	fi
+ 	
+if [ -z "$direc" ]; then
+	direc="/.fetch4me"
+fi
+
+if [ -z "$fu" ]; then
+	fu="wget"
+fi
+	echo "$0"
+if [ $# -le "2" -a "$ref" = "1" ]; then
+	echo "So bad."	
+	exit 0 
+fi
+
+
+arguments=("$@")
+	if [[ -f $direc/numb ]];then
+		read t < $direc/numb	
+	
+	else
+	t=0
+	fi
+w=0
+if [[ ! -d $direc ]];then 
+mkdir $direc
+fi
+
+
+for (( i=$arg; i<${#arguments[@]}; i++)); do
+	ref2=0
+	if [ "$arg" = "0" -a "${arguments[${i}]}" = "-r" ]; then
+		echo "So bad."
+	fi	
+
+	if [ "$arg" = "0" -a "${arguments[${i}]}" = "-w" ]; then
+		echo "So bad."
+	fi	
+
+	if [ "${arguments[${i}]}" = "-w" ]; then	
+		echo "So bad."
+	fi	
+		
+	if [ "${arguments[${i}]}" = "-r" ]; then
+			((j=i+1))	
+		if [ "${arguments[${j}]}" = "-r" ]; then
+			echo "So bad."
+		fi	
+		
+		if [ $j -lt ${#arguments[@]} ];then	
+			re=${arguments[${j}]}
+			((i=i+1))	
+			ref2=1
+		else 
+			echo "So bad."
+			exit 0
+		fi
+		ref=1
+	fi
+	if [ "$ref2" = "0" ];then
+	echo "arg $i:${arguments[${i}]}"
+		((t=t+1))
+		((w=w+1))
+		ARRAY[$w]=${arguments[${i}]}
+	fi
+done
+	if [ "$w" -lt "1" -a "$ref" = "1" ];then
+		echo "So bad."
+		exit 0
+	fi
+
+if [  -f $direc/Daemon ];then 
+	if [ $w > 0 ];then
+		for (( i=1;i<=$w;i++ )); do
+			echo $(($t-$w+$i)) >"$direc/numb"	
+			echo $re > "$direc/re$(($t-$w+$i))"
+			echo ${ARRAY[${i}]} > "$direc/URL$(($t-$w+$i))"		
+		done
+	else
+		echo "No args"
+	fi	
+
+else
+
+	for (( i=1;i<=$w;i++ )); do
+		echo $(($t-$w+$i)) >"$direc/numb"	
+		echo $re > "$direc/re$(($t-$w+$i))"
+		echo ${ARRAY[${i}]} > "$direc/URL$(($t-$w+$i))"		
+	done
+
+
+touch $direc/.finished
+touch $direc/.queue
+touch $direc/.status
+touch $direc/Daemon
+
+
+exec >/dev/null
+exec < /dev/null
+1>&2
+(
+trap "" SIGHUP
+
+while :
+do
+if [ ! -f $direc/numb ];then
+	s=0
+	echo $s >"$direc/numb"	
+	fi
+
+
+	read s < $direc/numb	
+	echo "s=$s"
+
+	if [ ! $s = 0 ];then
+		for (( i=0;i<=$((s-1));i++ )); do
+			read tmp < $direc/re$((i+1))
+			read tmp1 < $direc/URL$((i+1))
+			rm $direc/re$((i+1))
+			rm $direc/URL$((i+1))	
+			masDem=( "${masDem[@]}" "$tmp" ) 
+			masDem=( "${masDem[@]}" "$tmp1" ) 
+		done
+	
+	fi
+
+
+	
+if [ ! ${masDem[1]} = "" ];then
+
+echo "Downloading now- re-${masDem[0]} Url-${masDem[1]} " >>$QUEUE/.status
+echo "Downloading queue:" >>$QUEUE/.status
+for (( i=2;i<${#masDem[@]};i++ ));do
+echo "${masDem[${i}]}" >>$QUEUE/.status
+done
+for (( i=2;i<${#masDem[@]};i++ ));do
+echo "${masDem[${i}]}" >>$QUEUE/.queue
+done
+`$fu -q -P "/Downloads/fetched4you${masDem[0]}${masDem[1]}" ${masDem[1]}`
+	
+	echo "`date +%s` ${masDem[0]} ${masDem[1]}" >>$direc/.finished 
+
+	tmp3=${#masDem[@]} 
+	((tmp3=tmp3-1))
+	echo "tmp3=$tmp3"
+	declare -a masDemNEW=( ${masDem[@]:2:$tmp3} )
+	declare -a masDem=( ${masDemNEW[@]:0:$tmp3} )
+	echo "masDem=${masDem[@]}"
+	echo "masDemNEW=${masDemNEW[@]}"
+	
+	echo 0 > "$direc/numb"	
+	fi
+
+touch $direc/.finished
+prov= stat --format %Z $direc/.finished
+echo $prov	
+sleep 3
+done
+) &
+fi
