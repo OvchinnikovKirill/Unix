@@ -1,206 +1,259 @@
 #! /bin/bash -e
 # myvcs
-myname="${0##*/} (PID $$)"
-fetch/.fetch4merc  
+. /.fetch4merc 
 arg=0
 ref=0
 ref2=1 
-declare -a ARRAY
+declare -a mas
 declare -a masDem
+k1=0
 
-if [ "$1" = "-w" ]; then
-	direc=$2
-	arg=2
-	if [ "$2" = "-r" ]; then
-		echo "So bad."
-	fi
-	
-	if [ "$2" = "-w" ]; then
-		echo "So bad."
-	fi
-	
-	if [ "$3" = "-r" ]; then
-		re=$4
-		ref=1
-		arg=4
-	fi
- elif [ "$1" = "-r" ]; then
-	re=$2
-	ref=1
-	arg=2	
-	if [ "$2" = "-w" ]; then
-		echo "So bad."
-	fi
-	
-	if [ "$2" = "-r" ]; then
-		echo "So bad."
-	fi
-	
-	if [ $# -le "2" ]; then   #<3 proverit
-		echo "So bad."	
-		exit 0 
-	fi
-		if [ $3 = "-w" ]; then
-			direc=$4
-			arg=4
-		fi
-	fi
- 	
-if [ -z "$direc" ]; then
-	direc="/.fetch4me"
-fi
+Hp()
+{
+	local -a TMP
+	local -a hype
+	$($CopyArray $1 TMP)
+	TMP=( ${TMP[@]} ${hype[@]} )
+	$($CopyArray TMP $2)
 
-if [ -z "$fu" ]; then
-	fu="wget"
-fi
-	echo "$0"
-if [ $# -le "2" -a "$ref" = "1" ]; then
-	echo "So bad."	
-	exit 0 
-fi
+}
 
-
-arguments=("$@")
-	if [[ -f $direc/numb ]];then
-		read t < $direc/numb	
-	
-	else
-	t=0
-	fi
-w=0
-if [[ ! -d $direc ]];then 
-mkdir $direc
-fi
-
-
-for (( i=$arg; i<${#arguments[@]}; i++)); do
-	ref2=0
-	if [ "$arg" = "0" -a "${arguments[${i}]}" = "-r" ]; then
-		echo "So bad."
-	fi	
-
-	if [ "$arg" = "0" -a "${arguments[${i}]}" = "-w" ]; then
-		echo "So bad."
-	fi	
-
-	if [ "${arguments[${i}]}" = "-w" ]; then	
-		echo "So bad."
-	fi	
-		
-	if [ "${arguments[${i}]}" = "-r" ]; then
-			((j=i+1))	
-		if [ "${arguments[${j}]}" = "-r" ]; then
-			echo "So bad."
-		fi	
-		
-		if [ $j -lt ${#arguments[@]} ];then	
-			re=${arguments[${j}]}
-			((i=i+1))	
-			ref2=1
-		else 
-			echo "So bad."
-			exit 0
-		fi
-		ref=1
-	fi
-	if [ "$ref2" = "0" ];then
-	echo "arg $i:${arguments[${i}]}"
-		((t=t+1))
-		((w=w+1))
-		ARRAY[$w]=${arguments[${i}]}
-	fi
-done
-	if [ "$w" -lt "1" -a "$ref" = "1" ];then
-		echo "So bad."
-		exit 0
-	fi
-
-if [  -f $direc/Daemon ];then 
-	if [ $w > 0 ];then
-		for (( i=1;i<=$w;i++ )); do
-			echo $(($t-$w+$i)) >"$direc/numb"	
-			echo $re > "$direc/re$(($t-$w+$i))"
-			echo ${ARRAY[${i}]} > "$direc/URL$(($t-$w+$i))"		
-		done
-	else
-		echo "No args"
-	fi	
-
-else
-
-	for (( i=1;i<=$w;i++ )); do
-		echo $(($t-$w+$i)) >"$direc/numb"	
-		echo $re > "$direc/re$(($t-$w+$i))"
-		echo ${ARRAY[${i}]} > "$direc/URL$(($t-$w+$i))"		
-	done
-
-
-touch $direc/.finished
-touch $direc/.queue
-touch $direc/.status
-touch $direc/Daemon
-
-
+stdem () {
 exec >/dev/null
 exec < /dev/null
 1>&2
 (
 trap "" SIGHUP
 
+noref=0
+
 while :
 do
-if [ ! -f $direc/numb ];then
+if [ ! -f /$QQEDIR/numb ];then
+	echo "Del is bad!Request can be lost!"
 	s=0
-	echo $s >"$direc/numb"	
+	echo $s >"/$QQEDIR/numb"	
+fi
+
+read s < /$QQEDIR/numb	
+
+if [ ! $s = 0 ];then
+	for (( i=0;i<=$((s-1));i++ )); do
+		if [ -f /$QQEDIR/re$((i+1)) ];then
+			read temp < /$QQEDIR/re$((i+1))
+			rm /$QQEDIR/re$((i+1))
+			if [ ! $temp ];then	
+				temp="42"
+				noref=1
+			fi
+		fi
+		read temp1 < /$QQEDIR/URL$((i+1))
+		rm /$QQEDIR/URL$((i+1))	
+		masDem=( "${masDem[@]}" "$temp" ) 
+		masDem=( "${masDem[@]}" "$temp1" ) 
+	done
+fi
+
+if [ $k1 = 1 ];then
+	if [ ! ${#array1[@]} = 0 ];then
+		array1=( `cat "/$QQEDIR/.queue" | tr '\n' ' ' `)
+		Hp array1 masDem
 	fi
+fi	
 
-
-	read s < $direc/numb	
-	echo "s=$s"
-
-	if [ ! $s = 0 ];then
-		for (( i=0;i<=$((s-1));i++ )); do
-			read tmp < $direc/re$((i+1))
-			read tmp1 < $direc/URL$((i+1))
-			rm $direc/re$((i+1))
-			rm $direc/URL$((i+1))	
-			masDem=( "${masDem[@]}" "$tmp" ) 
-			masDem=( "${masDem[@]}" "$tmp1" ) 
-		done
-	
-	fi
-
-
-	
 if [ ! ${masDem[1]} = "" ];then
 
-echo "Downloading now- re-${masDem[0]} Url-${masDem[1]} " >>$QUEUE/.status
-echo "Downloading queue:" >>$QUEUE/.status
-for (( i=2;i<${#masDem[@]};i++ ));do
-echo "${masDem[${i}]}" >>$QUEUE/.status
-done
-for (( i=2;i<${#masDem[@]};i++ ));do
-echo "${masDem[${i}]}" >>$QUEUE/.queue
-done
-`$fu -q -P "/Downloads/fetched4you${masDem[0]}${masDem[1]}" ${masDem[1]}`
-	
-	echo "`date +%s` ${masDem[0]} ${masDem[1]}" >>$direc/.finished 
+	echo "Download ref-${masDem[0]} Url-${masDem[1]} " >>/$queue/.status
+	echo "queue:" >>/$queue/.status
+	for (( i=2;i<${#masDem[@]};i++ ));do
+		echo "${masDem[${i}]}" >>/$queue/.status
+	done
+	for (( i=1;i<${#masDem[@]};i++ ));do
+		echo "${masDem[${i}]}\n" >>/$queue/.queue
+	done
 
-	tmp3=${#masDem[@]} 
-	((tmp3=tmp3-1))
-	echo "tmp3=$tmp3"
-	declare -a masDemNEW=( ${masDem[@]:2:$tmp3} )
-	declare -a masDem=( ${masDemNEW[@]:0:$tmp3} )
+	if [ $noref -ne 1 ];then
+		`$GETELEMFUNC -q -P "/down/fetched4you/${masDem[0]}/${masDem[1]}" ${masDem[1]}`
+	else
+		`$GETELEMFUNC -q -P "/down/fetched4you/${masDem[1]}" ${masDem[1]}`
+	fi	
+
+	echo "`date +%s` ${masDem[0]} ${masDem[1]}" >>/$QQEDIR/.finished 
+
+	temp3=${#masDem[@]} 
+	((temp3=temp3-1))
+	echo "temp3=$temp3"
+	declare -a masdem1=( ${masDem[@]:2:$temp3} )
+	declare -a masDem=( ${masdem1[@]:0:$temp3} )
 	echo "masDem=${masDem[@]}"
-	echo "masDemNEW=${masDemNEW[@]}"
-	
-	echo 0 > "$direc/numb"	
-	fi
+	echo "masdem1=${masdem1[@]}"
 
-touch $direc/.finished
-prov= stat --format %Z $direc/.finished
-echo $prov	
+	echo 0 > "/$QQEDIR/numb"	
+fi
+
 sleep 3
 done
 ) &
+pn=$!
+echo $pn > /$QQEDIR/Daemon
+disown -h $pn
+
+}
+
+1>&2
+(
+if [ "$1" = "-w" ]; then
+	QQEDIR=$2
+	arg=2 
+	if [ "$2" = "-r" ]; then
+		echo "So bad ./fetch4me -w -r "
+		exit 1
+	fi
+
+	if [ "$2" = "-w" ]; then
+		echo "So bad ./fetch4me -w -w "
+		exit 1
+	fi
+
+	if [ "$3" = "-r" ]; then
+		re=$4
+		ref=1
+		arg=4
+	fi
+
+ elif [ "$1" = "-r" ]; then
+	re=$2
+	ref=1
+	arg=2	
+	if [ "$2" = "-w" ]; then
+		echo "So bad ./fetch4me -r -w "
+		exit 1
+	fi
+
+	if [ "$2" = "-r" ]; then
+		echo "So bad ./fetch4me -r -r "
+		exit 1
+	fi
+
+	if [ $# -le "2" ]; then  
+		echo "So bad! Arg with -r >=2"	
+		exit 1
+	fi
+		if [ $3 = "-w" ]; then
+			QQEDIR=$4
+			arg=4
+		fi
+	fi
+ 	
+if [ -z "$QQEDIR" ]; then
+	QQEDIR="/.fetch4me"
 fi
+
+if [ -z "$GETELEMFUNC" ]; then
+	GETELEMFUNC="wget"
+fi
+
+if [ $# -le "2" -a "$ref" = "1" ]; then
+	echo "So bad! Arg with -r >=2"	
+	exit 1
+fi
+
+
+args=("$@")
+	if [[ -f /$QQEDIR/numb ]];then
+		read t < /$QQEDIR/numb		
+	else
+		t=0
+	fi
+w=0
+
+if [[ ! -d $QQEDIR ]];then 
+	mkdir $QQEDIR
+fi
+
+
+for (( i=$arg; i<${#args[@]}; i++)); do
+	ref2=0
+	if [ "$arg" = "0" -a "${args[${i}]}" = "-r" ]; then
+		echo "Bad -r arg placement"
+		exit 1
+	fi	
+
+	if [ "$arg" = "0" -a "${args[${i}]}" = "-w" ]; then
+		echo "Bad -w arg  placement"
+		exit 1
+	fi	
+
+	if [ "${args[${i}]}" = "-w" ]; then	
+		echo " -w not correct "
+		exit 1
+	fi	
+
+	if [ "${args[${i}]}" = "-r" ]; then
+		((j=i+1))	
+		if [ "${args[${j}]}" = "-r" ]; then
+			echo "So bad ./fetch4me -r -r "
+			exit 1
+		fi	
+
+		if [ $j -lt ${#args[@]} ];then	
+			re=${args[${j}]}
+			((i=i+1))	
+			ref2=1
+		else 
+			echo "Miss opts arg"
+			exit 1
+		fi
+		ref=1
+	fi
+	if [ "$ref2" = "0" ];then
+			((t=t+1))
+			((w=w+1))
+			mas[$w]=${args[${i}]}
+	fi
+done
+	if [ "$w" -lt "1" -a "$ref" = "1" ];then
+		echo "So bad! Arg with -r >=2"
+		exit 1
+	fi
+
+if [  -f /$QQEDIR/Daemon ];then 
+	if [ $w > 0 ];then
+		for (( i=1;i<=$w;i++ )); do
+			echo $(($t-$w+$i)) >"/$QQEDIR/numb"	
+			if [ ! "$re" = "" ]; then
+			echo $re > "/$QQEDIR/re$(($t-$w+$i))"
+			fi
+			echo ${mas[${i}]} > "/$QQEDIR/URL$(($t-$w+$i))"		
+		done
+		if [  -f /$QQEDIR/Daemon ];then
+		read pn < /$QQEDIR/Daemon
+		if  ! `ps -A |grep ${pn}|grep fetch4me >> /dev/null` 
+		then	
+			k1=1
+			stdem 
+		fi
+		fi
+
+	else
+		echo "No args"
+		exit 1
+	fi	
+
+else
+
+	for (( i=1;i<=$w;i++ )); do
+		echo $(($t-$w+$i)) > "/$QQEDIR/numb"	
+		echo $re > "/$QQEDIR/re$(($t-$w+$i))"
+		echo ${mas[${i}]} > "/$QQEDIR/URL$(($t-$w+$i))"		
+	done
+
+
+	touch /$QQEDIR/.finished
+	touch /$QQEDIR/.queue
+	touch /$QQEDIR/.status
+	touch /$QQEDIR/Daemon
+
+	stdem
+fi
+) 
