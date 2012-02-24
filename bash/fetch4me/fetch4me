@@ -40,17 +40,17 @@ read s < /$QQEDIR/numb
 if [ ! $s = 0 ];then
 	for (( i=0;i<=$((s-1));i++ )); do
 		if [ -f /$QQEDIR/re$((i+1)) ];then
-			read temp < /$QQEDIR/re$((i+1))
+			read m < /$QQEDIR/re$((i+1))
 			rm /$QQEDIR/re$((i+1))
-			if [ ! $temp ];then	
-				temp="42"
+			if [ ! $m ];then	
+				m="42"
 				noref=1
 			fi
 		fi
-		read temp1 < /$QQEDIR/URL$((i+1))
+		read n < /$QQEDIR/URL$((i+1))
 		rm /$QQEDIR/URL$((i+1))	
-		masDem=( "${masDem[@]}" "$temp" ) 
-		masDem=( "${masDem[@]}" "$temp1" ) 
+		masDem=( "${masDem[@]}" "$m" ) 
+		masDem=( "${masDem[@]}" "$n" ) 
 	done
 fi
 
@@ -80,13 +80,13 @@ if [ ! ${masDem[1]} = "" ];then
 
 	echo "`date +%s` ${masDem[0]} ${masDem[1]}" >>/$QQEDIR/.finished 
 
-	temp3=${#masDem[@]} 
-	((temp3=temp3-1))
-	echo "temp3=$temp3"
-	declare -a masdem1=( ${masDem[@]:2:$temp3} )
-	declare -a masDem=( ${masdem1[@]:0:$temp3} )
+	b=${#masDem[@]} 
+	((b=b-1))
+	echo "b=$b"
+	declare -a masden=( ${masDem[@]:2:$b} )
+	declare -a masDem=( ${masden[@]:0:$b} )
 	echo "masDem=${masDem[@]}"
-	echo "masdem1=${masdem1[@]}"
+	echo "masden=${masden[@]}"
 
 	echo 0 > "/$QQEDIR/numb"	
 fi
