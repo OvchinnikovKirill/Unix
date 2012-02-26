@@ -1,0 +1,67 @@
+#!/bin/sh
+ 
+sed -r '
+/\w/!d
+1,$ {
+s/[^ ]* [^ ]* //
+}
+s/^/a~/
+'  $@ |\
+sed -rn '
+G
+s/^a~([^\n]+)(.*)\n([a-f]+)~\1\n(.*)/\3a~\1\2\n\4/
+t old_sob
+h
+s/\n.*//
+s/^a~//
+w /dev/stderr
+b ctrl_end
+
+:old_sob
+s/^([b-f]*)a{10}/\1b/; T done
+s/^([c-f]*)b{10}/\1c/; T done
+s/^([d-f]*)c{10}/\1d/; T done
+s/^([ef]*)d{10}/\1e/; T done
+s/^(f*)e{10}/\1f/; T done
+s/^f{10}//
+
+:done
+x
+
+:ctrl_end
+$!b
+s/.*/ Sobs/p
+x
+
+:begin_convert
+/^[0-9 ]/ b end_convert
+h
+s/~.*//
+t lx_convert
+
+:lx_convert
+s/a{9}/9/; t dx_convert
+s/a{8}/8/; t dx_convert
+s/a{7}/7/; t dx_convert
+s/a{6}/6/; t dx_convert
+s/a{5}/5/; t dx_convert
+s/a{4}/4/; t dx_convert
+s/a{3}/3/; t dx_convert
+s/a{2}/2/; t dx_convert
+s/a/1/; t dx_convert
+s/$/0/; t dx_convert
+
+:dx_convert
+y/bcdef/abcde/
+s/[a-f]/\0/
+t lx_convert
+
+s/^/     /
+s/.*(......)/\1/
+G
+s/([^\n]+)\n[a-f]+~([^\n]+\n)(.*)/\3\1 \2/
+b begin_convert
+
+:end_convert
+p
+'
