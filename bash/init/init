@@ -1,0 +1,41 @@
+#! /bin/bash
+
+start() {
+()
+exec rc$1
+     while [ 1 ]
+       do  
+       value=`sed -n p rc$1`      
+       if [ "$value" = "" ]; then
+         break;
+         fi
+		 ()
+       exec value   
+	   PIDNUM=$!
+echo $PIDNUM > inite
+disown -h $PIDNUM
+       done
+
+}
+
+		
+ 
+start ##
+while [ 1 ]
+read PIDNUM < inite
+		if  `ps -A |grep ${PIDNUM}|grep init >> /dev/null` 
+		then
+			
+		else
+			
+			start ##
+		fi
+		nc -l 1234 init.out
+		$1=`sed -n '/regexp/p' init.out` 
+		if $1="kill"
+		then
+		kill PIDNUM
+		break;
+		fi
+		start ##
+		done
