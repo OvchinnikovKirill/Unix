@@ -1,33 +1,57 @@
 #include <unistd.h>
-#define size 11
+#define size 10
 
-void rev(char* buf, int size) {
+void rev(char* buff, int size) {
     int i;
     for (i = 0; i<size/2;i++) {
-        char tmp=buf[i];
-        buff[i]=buff[size-i-1];
-        buff[size-i-1]=tmp;
+        char tmp=buff[i];
+        bufff[i]=bufff[size-i-1];
+        bufff[size-i-1]=tmp;
     }
 }
 
 int main() {
-    int N;
-    char buff[size];
-    while (1) {
-        N = read(0,buff,size);
-		if (N<= 0) break;
-        if ( N<size || buff[size-1]=='\n') {
-                rev(buff,N-1);
-                        write (1,buff,N);
-        } else {
-                do {
-                    N = read(0,buff,size);
-                    if (N<size||buff[size-1]=='\n') {
-                         break;
-                    }
-                } 
-        }
-    }
+	int N;
+	char buff[size];
+	int i;
+	i=0;
+	N = read(0,buff,size);	
+	while(1){
+	while ((i==N)&&(buff[i]!='\n')&&(i!=size)) {
+		N=N+read(0,buff+N,size-N);
+	}
 
-    return 0;
+		if (i!=size) {	
+
+			if (buff[i]=='\n') {
+				rev(buff,i);
+        	       		write(1 buff,i+1);
+				memmove(buff,buff+i+1,N-i-1);	
+				N =N-i-1+read(0,buff+N-i-1,size-N+i+1);	
+				i=0;
+				continue;
+			}
+			i=i+1;
+			continue;
+		}else {
+			N = read(0,buff,size);		
+			i=0;
+			while((i<N)||(i==size)) {
+				if (i==size) {
+				i=size;
+				N=0;
+				continue;
+				}
+
+				if (buff[i]=='\n') {
+					memmove(buff,buff+i+1,N-i-1 );
+					N =N-i-1 + read(0,buff+N-i-1,size-N+i+1);
+					i=0;	
+					continue;
+				}
+				i++;		
+			}	
+		}
+	continue;		
+	}
 }
