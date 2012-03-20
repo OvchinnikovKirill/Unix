@@ -5,8 +5,8 @@ void rev(char* buff, int size) {
     int i;
     for (i = 0; i<size/2;i++) {
         char tmp=buff[i];
-        bufff[i]=bufff[size-i-1];
-        bufff[size-i-1]=tmp;
+        buff[i]=buff[size-i-1];
+        buff[size-i-1]=tmp;
     }
 }
 
