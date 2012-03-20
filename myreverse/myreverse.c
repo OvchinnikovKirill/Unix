@@ -1,7 +1,7 @@
 #include <unistd.h>
 #define size 11
 
-void reverse(char* buf, int size) {
+void rev(char* buf, int size) {
     int i;
     for (i = 0; i<size/2;i++) {
         char tmp=buf[i];
